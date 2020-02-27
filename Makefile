@@ -40,7 +40,7 @@ CONFIG_SDIO_HCI = y
 CONFIG_GSPI_HCI = n
 ########################## Features ###########################
 CONFIG_MP_INCLUDED = y
-CONFIG_POWER_SAVING = n		# power saving seems broken
+CONFIG_POWER_SAVING = y		# power saving seems broken
 CONFIG_USB_AUTOSUSPEND = n
 CONFIG_HW_PWRP_DETECTION = n
 CONFIG_WIFI_TEST = n
@@ -63,7 +63,7 @@ CONFIG_ANTENNA_DIVERSITY = n
 CONFIG_TDLS = n
 CONFIG_WIFI_MONITOR = n
 ######################## Wake On Lan ##########################
-CONFIG_WOWLAN = n
+CONFIG_WOWLAN = y
 CONFIG_GPIO_WAKEUP = y
 CONFIG_WAKEUP_GPIO_IDX = default
 CONFIG_HIGH_ACTIVE = n

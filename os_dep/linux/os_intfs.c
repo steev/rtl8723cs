@@ -3126,14 +3126,23 @@ static int route_dump(u32 *gw_addr ,int* gw_index)
 
 	msg.msg_name = &nladdr;
 	msg.msg_namelen = sizeof(nladdr);
-	msg.msg_iov = &iov;
-	msg.msg_iovlen = 1;
 	msg.msg_control = NULL;
 	msg.msg_controllen = 0;
 	msg.msg_flags = MSG_DONTWAIT;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0))
+	iov_iter_init(&msg.msg_iter, WRITE, &iov, 1, sizeof(req));
+#else
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
+#endif
+
 	oldfs = get_fs(); set_fs(KERNEL_DS);
-	err = sock_sendmsg(sock, &msg, sizeof(req));
+	err = sock_sendmsg(sock, &msg
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0))
+			, sizeof(req)
+#endif
+			);
 	set_fs(oldfs);
 
 	if (err < 0)
@@ -3156,8 +3165,16 @@ restart:
 		iov.iov_base = pg;
 		iov.iov_len = PAGE_SIZE;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0))
+		iov_iter_init(&msg.msg_iter, READ, &iov, 1, PAGE_SIZE);
+#endif
+
 		oldfs = get_fs(); set_fs(KERNEL_DS);
-		err = sock_recvmsg(sock, &msg, PAGE_SIZE, MSG_DONTWAIT);
+		err = sock_recvmsg(sock, &msg,
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0))
+				   PAGE_SIZE,
+#endif
+				   MSG_DONTWAIT);
 		set_fs(oldfs);
 
 		if (err < 0)
@@ -3224,14 +3241,23 @@ done:
 
 		msg.msg_name = &nladdr;
 		msg.msg_namelen = sizeof(nladdr);
-		msg.msg_iov = &iov;
-		msg.msg_iovlen = 1;
 		msg.msg_control = NULL;
 		msg.msg_controllen = 0;
 		msg.msg_flags=MSG_DONTWAIT;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0))
+		iov_iter_init(&msg.msg_iter, WRITE, &iov, 1, sizeof(req));
+#else
+		msg.msg_iov = iov;
+		msg.msg_iovlen = 1;
+#endif
+
 		oldfs = get_fs(); set_fs(KERNEL_DS);
-		err = sock_sendmsg(sock, &msg, sizeof(req));
+		err = sock_sendmsg(sock, &msg
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0))
+				, sizeof(req)
+#endif
+				);
 		set_fs(oldfs);
 
 		if (err > 0)
@@ -4066,6 +4092,9 @@ _func_enter_;
 	if (pwrpriv->wowlan_wake_reason == RX_PNOWakeUp) {
 #ifdef CONFIG_IOCTL_CFG80211	
 		cfg80211_disconnected(padapter->pnetdev, 0, NULL, 0,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0))
+				false,
+#endif
 				GFP_ATOMIC);
 #endif
 		rtw_lock_ext_suspend_timeout(10000);
