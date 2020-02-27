@@ -64,7 +64,7 @@ CONFIG_TDLS = n
 CONFIG_WIFI_MONITOR = n
 ######################## Wake On Lan ##########################
 CONFIG_WOWLAN = n
-CONFIG_GPIO_WAKEUP = n
+CONFIG_GPIO_WAKEUP = y
 CONFIG_WAKEUP_GPIO_IDX = default
 CONFIG_HIGH_ACTIVE = n
 CONFIG_PNO_SUPPORT = n
