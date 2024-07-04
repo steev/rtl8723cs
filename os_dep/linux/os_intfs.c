@@ -22,6 +22,10 @@
 #include <drv_types.h>
 #include <hal_data.h>
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0))
+#define strlcpy strscpy
+#endif
+
 #if defined(PLATFORM_LINUX) && defined (PLATFORM_WINDOWS)
 
 	#error "Shall be Linux or Windows, but not both!\n"
